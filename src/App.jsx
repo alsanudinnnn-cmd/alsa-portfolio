@@ -4,26 +4,51 @@ import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import './App.css'
 
-const techStack = ['React', 'JavaScript', 'Node.js', 'Tailwind']
+const profileVideoFiles = import.meta.glob('../vid/meprofile.mp4', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+})
+
+const profileVideoUrl = Object.values(profileVideoFiles)[0] ?? null
+
+const projectImageFiles = import.meta.glob('../pic/*.{png,jpg,jpeg,webp,avif}', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+})
+
+const projectImageMap = Object.fromEntries(
+  Object.entries(projectImageFiles).map(([path, url]) => {
+    const name = path.split('/').pop()?.replace(/\.[^.]+$/, '').toLowerCase() ?? ''
+    return [name, url]
+  }),
+)
+
+const techStack = ['HTML', 'SQL', 'Node.js', 'Tailwind']
 
 const projects = [
   {
-    title: 'Campus Portal Redesign',
+    title: 'Website Laptop & Phone Repair',
     category: 'project',
-    type: 'UI/UX + Front End',
+    type: 'Services WebsiteS',
     description:
-      'A modern student dashboard focused on navigation clarity, performance, and mobile-first usability.',
+      'A web-based services Laptop & Phone Repair for students, featuring a clean interface, intuitive navigation, and responsive design.',
     preview: 'Student portal and dashboard UI system',
-    visualTitle: 'PROJECT',
+    visualTitle: 'Ebik.',
+    image: projectImageMap.ebik,
+    appUrl: 'https://alsanudinnnn-cmd.github.io/Ebik./',
   },
   {
-    title: 'Creative Brand Landing Page',
+    title: 'SmartWarm. IoT-based Warm-up Game System',
     category: 'design',
-    type: 'Web Design',
+    type: 'IoT Game System',
     description:
-      'A polished marketing site with strong visual storytelling, animation, and conversion-driven sections.',
-    preview: 'Marketing page with premium visual direction',
-    visualTitle: 'DESIGN',
+      'A Final Year Project focused on Iot-based Warm up game system, a interactive LED displays, and a user-friendly interface for an engaging gaming experience.',
+    preview: 'IoT based Interactive LED Challenge ',
+    visualTitle: 'SmartWarm',
+    image: projectImageMap.smartwarm,
+    appUrl: 'https://smartwarm.site/',
   },
   {
     title: 'Portfolio System Concept',
@@ -33,6 +58,7 @@ const projects = [
       'An interactive portfolio experience with intro states, motion design, and modular content blocks.',
     preview: 'Motion-led portfolio presentation concept',
     visualTitle: 'EDIT',
+    appUrl: '#contact',
   },
 ]
 
@@ -67,14 +93,19 @@ const certificates = Object.entries(certificateFiles).map(([path, url]) => {
     .replace(/\s+\(\d+\)$/, '')
     .replace(/\s+/g, ' ')
     .trim()
+  const year = fileName.match(/\b(20\d{2})\b/)?.[1] ?? '2026'
+  const issuer = label.split(/\s+-\s+|\s+\|\s+/)[0] || 'Verified Certificate'
 
   return {
     title: label,
     href: url,
-    type: 'PDF Certificate',
-    description: 'Click to open this certificate in a new tab.',
+    type: 'Verified Credential',
+    issuer,
+    year,
+    category: 'Certificate',
+    description: 'Validated learning achievement available as a PDF.',
     preview: 'Certified learning and validated achievement',
-    visualTitle: 'CERTIFICATE',
+    visualTitle: 'CERT',
   }
 })
 
@@ -213,6 +244,21 @@ function IconArrowLine() {
   )
 }
 
+function IconClose() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M6 6l12 12M18 6 6 18"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+    </svg>
+  )
+}
+
 function TechLogo({ item }) {
   if (item.image) {
     return <img src={item.image} alt="" />
@@ -232,6 +278,57 @@ function TechLogo({ item }) {
       {item.kind === 'canva' ? 'C' : null}
     </div>
   )
+}
+
+function CountUpNumber({ value }) {
+  const [count, setCount] = useState(0)
+  const numberValue = Number(value)
+  const countRef = useRef(null)
+
+  useEffect(() => {
+    const element = countRef.current
+
+    if (!element || Number.isNaN(numberValue)) {
+      return undefined
+    }
+
+    let frameId = 0
+    let startTime = 0
+
+    const animateValue = (timestamp) => {
+      if (!startTime) {
+        startTime = timestamp
+      }
+
+      const progress = Math.min((timestamp - startTime) / 1100, 1)
+      const easedProgress = 1 - (1 - progress) ** 3
+
+      setCount(Math.round(numberValue * easedProgress))
+
+      if (progress < 1) {
+        frameId = window.requestAnimationFrame(animateValue)
+      }
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          frameId = window.requestAnimationFrame(animateValue)
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.55 },
+    )
+
+    observer.observe(element)
+
+    return () => {
+      window.cancelAnimationFrame(frameId)
+      observer.disconnect()
+    }
+  }, [numberValue])
+
+  return <strong ref={countRef}>{Number.isNaN(numberValue) ? value : count}</strong>
 }
 
 function LanyardBadge() {
@@ -477,8 +574,10 @@ function LanyardBadge() {
 function App() {
   const [isOverlayVisible, setIsOverlayVisible] = useState(true)
   const [isOverlayFading, setIsOverlayFading] = useState(false)
+  const [activeSection, setActiveSection] = useState('home')
   const [portfolioSection, setPortfolioSection] = useState('projects')
   const [portfolioFilter, setPortfolioFilter] = useState('project')
+  const [activeCertificate, setActiveCertificate] = useState(null)
   const [comments, setComments] = useState([])
   const [contactForm, setContactForm] = useState({
     name: '',
@@ -530,6 +629,54 @@ function App() {
     }
   }, [portfolioSection, portfolioFilter, comments.length])
 
+  useEffect(() => {
+    const sections = Array.from(document.querySelectorAll('main section[id]'))
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleEntry = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((first, second) => second.intersectionRatio - first.intersectionRatio)[0]
+
+        if (visibleEntry?.target.id) {
+          setActiveSection(visibleEntry.target.id)
+        }
+      },
+      {
+        threshold: [0.28, 0.42, 0.6],
+        rootMargin: '-18% 0px -52% 0px',
+      },
+    )
+
+    sections.forEach((section) => observer.observe(section))
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!activeCertificate) {
+      return undefined
+    }
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setActiveCertificate(null)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }, [activeCertificate])
+
   const portfolioItems =
     portfolioFilter === 'project'
       ? projects
@@ -567,6 +714,11 @@ function App() {
     })
   }
 
+  const openCertificateModal = (event, certificate) => {
+    event.preventDefault()
+    setActiveCertificate(certificate)
+  }
+
   return (
     <div className="page-shell">
       {isOverlayVisible ? (
@@ -596,7 +748,7 @@ function App() {
                 </div>
 
                 <a className="intro-link" href="#home">
-                  www.fazrilukman.my
+                  www.alsa-cmd.it.com
                 </a>
               </div>
 
@@ -640,10 +792,10 @@ function App() {
           </a>
 
           <nav className="nav">
-            <a href="#home">Home</a>
-            <a href="#about">About</a>
-            <a href="#portfolio">Portfolio</a>
-            <a href="#contact">Contact</a>
+            <a className={activeSection === 'home' ? 'is-active' : ''} href="#home">Home</a>
+            <a className={activeSection === 'about' ? 'is-active' : ''} href="#about">About</a>
+            <a className={activeSection === 'portfolio' ? 'is-active' : ''} href="#portfolio">Portfolio</a>
+            <a className={activeSection === 'contact' ? 'is-active' : ''} href="#contact">Contact</a>
           </nav>
         </header>
 
@@ -732,7 +884,20 @@ function App() {
 
           <div className="about-portrait reveal reveal-right" data-reveal>
             <div className="portrait-ring">
-              <img src={heroImage} alt="Alsa portrait" />
+              {profileVideoUrl ? (
+                <video
+                  className="profile-video"
+                  src={profileVideoUrl}
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  preload="metadata"
+                  aria-label="Alsa profile video"
+                />
+              ) : (
+                <img src={heroImage} alt="Alsa portrait" />
+              )}
             </div>
           </div>
         </section>
@@ -758,7 +923,7 @@ function App() {
                   <div className="about-stat-icon">{icon}</div>
                   <div className="about-stat-copy">
                     <p>{stat.label}</p>
-                    <strong>{stat.value}</strong>
+                    <CountUpNumber value={stat.value} />
                     <span>{stat.description}</span>
                   </div>
                   <small>live</small>
@@ -781,16 +946,17 @@ function App() {
 
           <div className="portfolio-main-tabs reveal reveal-up" data-reveal>
             {[
-              ['projects', 'Projects'],
-              ['certificates', 'Certificates'],
-              ['tech', 'Tech Stack'],
-            ].map(([value, label]) => (
+              ['projects', 'Projects', <IconCode key="projects-icon" />],
+              ['certificates', 'Certificates', <IconBadge key="certificates-icon" />],
+              ['tech', 'Tech Stack', <IconGlobe key="tech-icon" />],
+            ].map(([value, label, icon]) => (
               <button
                 key={value}
                 type="button"
                 className={portfolioSection === value ? 'is-active' : ''}
                 onClick={() => setPortfolioSection(value)}
               >
+                <span className="portfolio-tab-icon">{icon}</span>
                 {label}
               </button>
             ))}
@@ -822,7 +988,8 @@ function App() {
                     className="showcase-card reveal reveal-up"
                     data-reveal
                   >
-                    <div className="showcase-preview">
+                    <div className={`showcase-preview ${project.image ? 'has-image' : ''}`}>
+                      {project.image ? <img src={project.image} alt={`${project.title} preview`} /> : null}
                       <div className="showcase-overlay">
                         <span className="showcase-domain">{project.type}</span>
                         <h3>{project.visualTitle}</h3>
@@ -834,7 +1001,7 @@ function App() {
                       <h4>{project.title}</h4>
                       <p>{project.description}</p>
                       <div className="showcase-actions">
-                        <a href="#contact">
+                        <a href={project.appUrl} target="_blank" rel="noreferrer">
                           View App
                           <IconExternal />
                         </a>
@@ -859,25 +1026,32 @@ function App() {
                   >
                     <div className="showcase-preview certificate-preview">
                       <div className="showcase-overlay">
-                        <span className="showcase-domain">{certificate.type}</span>
+                        <span className="showcase-domain">{certificate.category}</span>
                         <h3>{certificate.visualTitle}</h3>
                         <p>{certificate.preview}</p>
+                        <div className="certificate-meta">
+                          <span>{certificate.issuer}</span>
+                          <span>{certificate.year}</span>
+                        </div>
                       </div>
                     </div>
 
                     <div className="showcase-copy">
                       <h4>{certificate.title}</h4>
                       <p>{certificate.description}</p>
+                      <div className="certificate-detail-row">
+                        <span>{certificate.type}</span>
+                        <span>{certificate.year}</span>
+                      </div>
                       <div className="showcase-actions">
-                        <a href={certificate.href} target="_blank" rel="noreferrer">
+                        <a href={certificate.href} onClick={(event) => openCertificateModal(event, certificate)}>
                           View PDF
                           <IconExternal />
                         </a>
                         <a
                           className="showcase-secondary-action"
                           href={certificate.href}
-                          target="_blank"
-                          rel="noreferrer"
+                          onClick={(event) => openCertificateModal(event, certificate)}
                         >
                           Details
                           <IconArrowLine />
@@ -954,7 +1128,7 @@ function App() {
                 </label>
               </form>
 
-              <div className="contact-footer-note">Alsa · 2026</div>
+              <div className="contact-footer-note">Alsa - 2026</div>
             </div>
 
             <div className="contact-panel contact-panel-right reveal reveal-right" data-reveal>
@@ -1016,6 +1190,35 @@ function App() {
           <IconArrow />
         </a>
       </main>
+
+      {activeCertificate ? (
+        <div
+          className="pdf-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-label={activeCertificate.title}
+          onClick={() => setActiveCertificate(null)}
+        >
+          <div className="pdf-modal-shell" onClick={(event) => event.stopPropagation()}>
+            <div className="pdf-modal-header">
+              <strong>{activeCertificate.title}</strong>
+              <button
+                type="button"
+                className="pdf-modal-close"
+                aria-label="Close certificate"
+                onClick={() => setActiveCertificate(null)}
+              >
+                <IconClose />
+              </button>
+            </div>
+            <iframe
+              className="pdf-modal-frame"
+              title={activeCertificate.title}
+              src={activeCertificate.href}
+            />
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }

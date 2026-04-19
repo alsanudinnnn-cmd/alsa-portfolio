@@ -1,23 +1,23 @@
 :root {
-  --color-bg: #f6efe6;
-  --color-bg-alt: #efe3d3;
-  --color-surface: rgba(255, 251, 246, 0.88);
-  --color-surface-strong: #fffdf9;
-  --color-heading: #3f2d1e;
-  --color-text: #5a4330;
-  --color-text-soft: rgba(90, 67, 48, 0.78);
-  --color-muted: rgba(111, 83, 58, 0.6);
-  --color-accent: #a57a51;
-  --color-accent-strong: #8f6a45;
-  --font-body: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  --font-heading: Georgia, 'Times New Roman', serif;
+  --color-bg: #030918;
+  --color-bg-alt: #071227;
+  --color-surface: rgba(13, 25, 54, 0.8);
+  --color-surface-strong: #0f1e3e;
+  --color-heading: #e8f2ff;
+  --color-text: #bfd1ef;
+  --color-text-soft: rgba(186, 206, 236, 0.8);
+  --color-muted: rgba(133, 168, 220, 0.66);
+  --color-accent: #4ca3ff;
+  --color-accent-strong: #1e7bff;
+  --font-body: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --font-heading: 'Space Grotesk', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 
   font-family: var(--font-body);
   color: var(--color-text);
   background:
-    radial-gradient(circle at top center, rgba(205, 171, 128, 0.22), transparent 28%),
-    radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.72), transparent 32%),
-    linear-gradient(180deg, #f9f3ec 0%, #efe5d9 100%);
+    radial-gradient(circle at top center, rgba(23, 91, 255, 0.2), transparent 36%),
+    radial-gradient(circle at 82% 24%, rgba(0, 187, 255, 0.14), transparent 28%),
+    linear-gradient(180deg, #020713 0%, #050d1f 100%);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -38,9 +38,9 @@ body {
   min-width: 320px;
   min-height: 100vh;
   background:
-    radial-gradient(circle at top center, rgba(205, 171, 128, 0.22), transparent 28%),
-    radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.72), transparent 32%),
-    linear-gradient(180deg, #f9f3ec 0%, #efe5d9 100%);
+    radial-gradient(circle at top center, rgba(23, 91, 255, 0.2), transparent 36%),
+    radial-gradient(circle at 82% 24%, rgba(0, 187, 255, 0.14), transparent 28%),
+    linear-gradient(180deg, #020713 0%, #050d1f 100%);
 }
 
 body::before {
@@ -48,10 +48,10 @@ body::before {
   position: fixed;
   inset: 0;
   background:
-    linear-gradient(90deg, rgba(124, 92, 61, 0.025) 1px, transparent 1px),
-    linear-gradient(rgba(124, 92, 61, 0.02) 1px, transparent 1px);
+    linear-gradient(90deg, rgba(120, 170, 255, 0.06) 1px, transparent 1px),
+    linear-gradient(rgba(120, 170, 255, 0.05) 1px, transparent 1px);
   background-size: 58px 58px;
-  opacity: 0.16;
+  opacity: 0.24;
   pointer-events: none;
 }
 
@@ -59,7 +59,7 @@ body::after {
   content: '';
   position: fixed;
   inset: 0;
-  background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.38), transparent 24%);
+  background: radial-gradient(circle at 24% 18%, rgba(138, 189, 255, 0.18), transparent 34%);
   pointer-events: none;
 }
 
