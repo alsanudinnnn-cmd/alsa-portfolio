@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import heroImage from './assets/hero.png'
 import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
 import './App.css'
 
 const profileVideoFiles = import.meta.glob('../vid/meprofile.mp4', {
@@ -25,6 +24,8 @@ const projectImageMap = Object.fromEntries(
   }),
 )
 
+const idBadgeLanyardImage = projectImageMap.idbadgeslanyard ?? null
+
 const techStack = ['HTML', 'SQL', 'Node.js', 'Tailwind']
 
 const projects = [
@@ -41,7 +42,7 @@ const projects = [
   },
   {
     title: 'SmartWarm. IoT-based Warm-up Game System',
-    category: 'design',
+    category: 'project',
     type: 'IoT Game System',
     description:
       'A Final Year Project focused on Iot-based Warm up game system, a interactive LED displays, and a user-friendly interface for an engaging gaming experience.',
@@ -51,32 +52,37 @@ const projects = [
     appUrl: 'https://smartwarm.site/',
   },
   {
-    title: 'Portfolio System Concept',
-    category: 'editing',
-    type: 'Personal Project',
+    title: 'Piex Jury Management Platform',
+    category: 'project',
+    type: 'Jury Management Platform',
     description:
-      'An interactive portfolio experience with intro states, motion design, and modular content blocks.',
-    preview: 'Motion-led portfolio presentation concept',
-    visualTitle: 'EDIT',
-    appUrl: '#contact',
-  },
-]
-
-const aboutStats = [
-  {
-    label: 'Total Projects',
-    value: '13',
-    description: 'Web, design, and editing work delivered',
+      'A jury management platform. Focused on participant flow, scoring workflows, and transparent result display for streamlined event management.',
+    preview: 'Jury management dashboard and scoring.',
+    visualTitle: 'Piex Jury',
+    image: projectImageMap.piex,
+    appUrl: 'https://spexpmj.infinityfreeapp.com/index.php',
   },
   {
-    label: 'Certificates',
-    value: '2',
-    description: 'Professional skills validated',
+    title: 'IDS + IPS Monitoring Project',
+    category: 'project',
+    type: 'Pending Project',
+    description:
+      'A network security monitoring solution in progress, focused on integrating IDS and IPS workflows for real-time threat visibility and response.',
+    preview: 'Security dashboard and alert pipeline currently in development',
+    visualTitle: 'IDS + IPS',
+    appUrl: '#',
+    pending: true,
   },
   {
-    label: 'Years of Experience',
-    value: '2',
-    description: 'Continuous learning journey',
+    title: 'Donexa Streamer Donation Platform',
+    category: 'project',
+    type: 'Pending Project',
+    description:
+      'A streamer donation platform concept where supporters can send donations with videos or images to create more interactive livestream moments.',
+    preview: 'Donation flow with supporter media attachments currently in development',
+    visualTitle: 'Donexa',
+    appUrl: '#',
+    pending: true,
   },
 ]
 
@@ -86,43 +92,211 @@ const certificateFiles = import.meta.glob('../pdf/*.pdf', {
   import: 'default',
 })
 
-const certificates = Object.entries(certificateFiles).map(([path, url]) => {
-  const fileName = path.split('/').pop()?.replace(/\.pdf$/i, '') ?? 'Certificate'
-  const label = fileName
+const formatCertificateTitle = (rawName) =>
+  rawName
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
     .replace(/[_-]+/g, ' ')
     .replace(/\s+\(\d+\)$/, '')
     .replace(/\s+/g, ' ')
     .trim()
-  const year = fileName.match(/\b(20\d{2})\b/)?.[1] ?? '2026'
-  const issuer = label.split(/\s+-\s+|\s+\|\s+/)[0] || 'Verified Certificate'
 
-  return {
-    title: label,
-    href: url,
-    type: 'Verified Credential',
-    issuer,
-    year,
-    category: 'Certificate',
-    description: 'Validated learning achievement available as a PDF.',
-    preview: 'Certified learning and validated achievement',
-    visualTitle: 'CERT',
+const getCertificateBackground = (fileName) => {
+  const lowerFileName = fileName.toLowerCase()
+
+  if (lowerFileName.includes('comptia')) {
+    return projectImageMap.bg_comptia ?? null
   }
-})
+
+  if (lowerFileName.includes('transcript') || lowerFileName.includes('transkrip')) {
+    return projectImageMap.bg_transkripkk ?? null
+  }
+
+  if (lowerFileName.includes('resume') || lowerFileName.includes('cv')) {
+    return projectImageMap.bg_resume ?? null
+  }
+
+  return null
+}
+
+const certificates = Object.entries(certificateFiles).map(([path, url]) => {
+    const fileName = path.split('/').pop()?.replace(/\.pdf$/i, '') ?? 'Certificate'
+    const label = formatCertificateTitle(fileName)
+    const image = getCertificateBackground(fileName)
+    const year = fileName.match(/\b(20\d{2})\b/)?.[1] ?? '2026'
+    const lowerLabel = label.toLowerCase()
+    const isTranscript = lowerLabel.includes('transcript') || lowerLabel.includes('transkrip')
+    const isResume = lowerLabel.includes('resume') || lowerLabel.includes('cv')
+    const issuer = lowerLabel.includes('comptia')
+      ? 'CompTIA'
+      : isTranscript
+        ? 'Kolej Komuniti'
+        : isResume
+          ? 'Personal Profile'
+        : 'Verified Certificate'
+
+    return {
+      title: label,
+      href: url,
+      type: isTranscript ? 'Academic Record' : isResume ? 'Professional Resume' : 'Verified Credential',
+      issuer,
+      year,
+      category: isTranscript ? 'Transcript' : isResume ? 'Resume' : 'Certificate',
+      description: isTranscript
+        ? 'Academic transcript available as a PDF.'
+        : isResume
+          ? 'Updated resume document available as a PDF.'
+        : 'Validated learning achievement available as a PDF.',
+      preview: isTranscript
+        ? 'Official academic record and course results'
+        : isResume
+          ? 'Professional profile, skills, and experience overview'
+        : 'Certified learning and validated achievement',
+      visualTitle: isTranscript ? 'RECORD' : isResume ? 'CV' : 'CERT',
+      image,
+    }
+  })
+
+const aboutStats = [
+  {
+    label: 'Total Projects',
+    value: String(projects.length),
+    description: 'Web, design, and editing work delivered',
+  },
+  {
+    label: 'Certificates',
+    value: String(certificates.length),
+    description: 'Professional skills validated',
+  },
+  {
+    label: 'Years of Experience',
+    value: '2',
+    description: 'Continuous learning journey',
+  },
+]
 
 const techItems = [
   { name: 'HTML', kind: 'html' },
   { name: 'CSS', kind: 'css' },
   { name: 'JavaScript', kind: 'js' },
-  { name: 'Tailwind CSS', kind: 'tailwind' },
   { name: 'ReactJS', kind: 'react', image: reactLogo },
-  { name: 'Vite', kind: 'vite', image: viteLogo },
-  { name: 'Node JS', kind: 'node' },
   { name: 'Bootstrap', kind: 'bootstrap' },
   { name: 'Firebase', kind: 'firebase' },
   { name: 'Material UI', kind: 'mui' },
-  { name: 'Figma', kind: 'figma' },
   { name: 'Canva', kind: 'canva' },
 ]
+
+const experienceItems = [
+  {
+    role: 'IT Technician',
+    company: 'AJ Technology',
+    period: '01/2024 - 01/2026',
+    location: 'Johor Bahru',
+    category: 'IT Support',
+    highlights: [
+      'Provided technical support by troubleshooting hardware, software, and network issues to ensure minimal system downtime.',
+      'Installed, configured, and maintained computer systems, printers, and related IT equipment.',
+      'Performed routine system updates, diagnostics, and preventive maintenance to maintain optimal performance.',
+    ],
+  },
+  {
+    role: 'Software Engineer Junior',
+    company: 'Kyocera',
+    period: '04/2022 - 03/2023',
+    location: 'Johor Bahru',
+    category: 'Engineering',
+    highlights: [
+      'Supported engineering operations by troubleshooting technical systems and resolving production-related issues.',
+      'Assisted in process optimization initiatives to improve workflow efficiency and system reliability.',
+      'Collaborated with cross-functional teams to ensure compliance with technical standards and operational requirements.',
+    ],
+  },
+  {
+    role: 'Store Management Trainee',
+    company: 'Original Classic.',
+    period: '05/2021 - 04/2022',
+    location: 'Johor Bahru',
+    category: 'Retail',
+    highlights: [
+      'Delivered customer service by assisting with product selection and responding to inquiries.',
+      'Managed inventory restocking and ensured accurate stock organization.',
+      'Processed sales transactions and maintained accurate daily sales records.',
+    ],
+  },
+  {
+    role: 'Store Management Trainee',
+    company: 'Gatti (M) Sdn. Bhd.',
+    period: '06/2020 - 05/2021',
+    location: 'Johor Bahru',
+    category: 'Retail',
+    highlights: [
+      'Delivered customer service by assisting with product selection and responding to inquiries.',
+      'Managed inventory restocking and ensured accurate stock organization.',
+      'Processed sales transactions and maintained accurate daily sales records.',
+    ],
+  },
+]
+
+const keyAchievements = [
+  {
+    title: 'Spex 2026',
+    detail:
+      'Gold Best Project in Faculty Information Technology; Best Overall Project in Politeknik Mersing, Johor.',
+    tag: 'Project Award',
+  },
+  {
+    title: 'Piex 2026',
+    detail:
+      'Best Project Software and Development; Best Overall Project in Faculty Information Technology.',
+    tag: 'Project Award',
+  },
+  {
+    title: 'Top 9 Finalist at CPROM 2025',
+    detail: 'Top 9 Finalist, CPROM 2025 International Level Competition.',
+    tag: 'International',
+  },
+  {
+    title: 'Silver Award Recipient at Data Hackathon 2025',
+    detail: 'Silver Award Recipient, Data Hackathon 2025 - National Level.',
+    tag: 'National',
+  },
+  {
+    title: 'Gold Award Recipient at Innotech 2022',
+    detail: 'Gold Award Recipient, Innotech 2022 - National Level.',
+    tag: 'National',
+  },
+  {
+    title: 'Chairperson of PPJTMK',
+    detail:
+      'Chairperson (Pengerusi), Persatuan Pelajar Jabatan Teknologi Maklumat & Komunikasi (PPJTMK), Politeknik.',
+    tag: 'Leadership',
+  },
+  {
+    title: 'Secretary of JPP',
+    detail:
+      'Secretary (Setiausaha), Jawatankuasa Perwakilan Pelajar (JPP), Kolej Komuniti.',
+    tag: 'Leadership',
+  },
+]
+
+const achievementGallery = [
+  {
+    title: 'Data Hackathon 2025',
+    caption: 'National-level silver award recognition.',
+    image: projectImageMap.datahackthon ?? heroImage,
+  },
+  {
+    title: 'Innotech 2022',
+    caption: 'National-level gold award achievement.',
+    image: projectImageMap.innotech ?? heroImage,
+  },
+  {
+    title: 'Spex 2026',
+    caption: 'Best overall project recognition milestone.',
+    image: projectImageMap.spex2026 ?? heroImage,
+  },
+]
+
+const CONTACT_EMAIL = 'alsanudinnnn@gmail.com'
 
 function IconArrow() {
   return (
@@ -255,6 +429,97 @@ function IconClose() {
         strokeLinejoin="round"
         strokeWidth="1.8"
       />
+    </svg>
+  )
+}
+
+function IconHome() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M4 10.5 12 4l8 6.5M6.5 9.5V20h11V9.5M10 20v-5h4v5"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+    </svg>
+  )
+}
+
+function IconUser() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8ZM5 20a7 7 0 0 1 14 0"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+    </svg>
+  )
+}
+
+function IconTrophy() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M8 4h8v3a4 4 0 1 1-8 0V4ZM7 5H4v2a4 4 0 0 0 4 4M17 5h3v2a4 4 0 0 1-4 4M12 11v4M9 20h6"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+    </svg>
+  )
+}
+
+function IconBriefcase() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M4 8h16v10a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8ZM9 8V6a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2M4 13h16"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.8"
+      />
+    </svg>
+  )
+}
+
+function IconGitHub() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M12 2.6a9.4 9.4 0 0 0-3 18.3c.5.1.7-.2.7-.5v-1.8c-2.9.6-3.5-1.2-3.5-1.2-.5-1.2-1.1-1.5-1.1-1.5-.9-.6.1-.6.1-.6 1 0 1.5 1 1.5 1 .9 1.5 2.3 1.1 2.9.8.1-.6.3-1.1.6-1.4-2.3-.3-4.8-1.2-4.8-5.2 0-1.1.4-2.1 1.1-2.8-.1-.3-.5-1.4.1-2.8 0 0 .9-.3 3 1.1A10.2 10.2 0 0 1 12 4.6c.9 0 1.8.1 2.6.4 2.1-1.4 3-1.1 3-1.1.6 1.4.2 2.5.1 2.8.7.7 1.1 1.7 1.1 2.8 0 4-2.4 4.9-4.8 5.2.4.3.7 1 .7 2v3.1c0 .3.2.6.7.5A9.4 9.4 0 0 0 12 2.6Z"
+        fill="currentColor"
+      />
+    </svg>
+  )
+}
+
+function IconInstagram() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M8 3.5h8A4.5 4.5 0 0 1 20.5 8v8a4.5 4.5 0 0 1-4.5 4.5H8A4.5 4.5 0 0 1 3.5 16V8A4.5 4.5 0 0 1 8 3.5Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <path
+        d="M12 8.2a3.8 3.8 0 1 1 0 7.6 3.8 3.8 0 0 1 0-7.6Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.8"
+      />
+      <path d="M17 7.1h.01" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="2.6" />
     </svg>
   )
 }
@@ -523,42 +788,51 @@ function LanyardBadge() {
           role="presentation"
         >
           <div className="lanyard-card-face lanyard-card-front">
-            <svg viewBox="0 0 120 120" aria-hidden="true">
-              <path
-                d="M60 58m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="5"
+            {idBadgeLanyardImage ? (
+              <img
+                className="lanyard-card-image"
+                src={idBadgeLanyardImage}
+                alt="Alsa ID badge lanyard"
+                draggable="false"
               />
-              <path
-                d="M60 58c-18-23-38-30-44-20-6 10 7 28 28 40"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeWidth="5"
-              />
-              <path
-                d="M60 58c28-8 49-5 51 7 2 12-19 21-48 21"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeWidth="5"
-              />
-              <path
-                d="M60 58c-10 28-8 49 4 52 12 3 23-18 24-47"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeWidth="5"
-              />
-              <path
-                d="M60 58c23-17 33-36 24-45-9-9-28 1-43 23"
-                fill="none"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeWidth="5"
-              />
-            </svg>
+            ) : (
+              <svg viewBox="0 0 120 120" aria-hidden="true">
+                <path
+                  d="M60 58m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="5"
+                />
+                <path
+                  d="M60 58c-18-23-38-30-44-20-6 10 7 28 28 40"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeWidth="5"
+                />
+                <path
+                  d="M60 58c28-8 49-5 51 7 2 12-19 21-48 21"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeWidth="5"
+                />
+                <path
+                  d="M60 58c-10 28-8 49 4 52 12 3 23-18 24-47"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeWidth="5"
+                />
+                <path
+                  d="M60 58c23-17 33-36 24-45-9-9-28 1-43 23"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeLinecap="round"
+                  strokeWidth="5"
+                />
+              </svg>
+            )}
           </div>
           <div className="lanyard-card-face lanyard-card-back">
             <span className="lanyard-card-label">ALSA</span>
@@ -576,18 +850,13 @@ function App() {
   const [isOverlayFading, setIsOverlayFading] = useState(false)
   const [activeSection, setActiveSection] = useState('home')
   const [portfolioSection, setPortfolioSection] = useState('projects')
-  const [portfolioFilter, setPortfolioFilter] = useState('project')
   const [activeCertificate, setActiveCertificate] = useState(null)
-  const [comments, setComments] = useState([])
   const [contactForm, setContactForm] = useState({
     name: '',
     email: '',
     message: '',
   })
-  const [commentForm, setCommentForm] = useState({
-    name: '',
-    message: '',
-  })
+  const [contactFormNotice, setContactFormNotice] = useState('')
 
   useEffect(() => {
     const fadeTimer = window.setTimeout(() => {
@@ -627,31 +896,34 @@ function App() {
     return () => {
       observer.disconnect()
     }
-  }, [portfolioSection, portfolioFilter, comments.length])
+  }, [portfolioSection])
 
   useEffect(() => {
     const sections = Array.from(document.querySelectorAll('main section[id]'))
+    if (sections.length === 0) {
+      return undefined
+    }
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visibleEntry = entries
-          .filter((entry) => entry.isIntersecting)
-          .sort((first, second) => second.intersectionRatio - first.intersectionRatio)[0]
+    const updateActiveSection = () => {
+      const scrollPosition = window.scrollY + 120
+      let currentSectionId = sections[0].id
 
-        if (visibleEntry?.target.id) {
-          setActiveSection(visibleEntry.target.id)
+      sections.forEach((section) => {
+        if (scrollPosition >= section.offsetTop) {
+          currentSectionId = section.id
         }
-      },
-      {
-        threshold: [0.28, 0.42, 0.6],
-        rootMargin: '-18% 0px -52% 0px',
-      },
-    )
+      })
 
-    sections.forEach((section) => observer.observe(section))
+      setActiveSection(currentSectionId)
+    }
+
+    updateActiveSection()
+    window.addEventListener('scroll', updateActiveSection, { passive: true })
+    window.addEventListener('resize', updateActiveSection)
 
     return () => {
-      observer.disconnect()
+      window.removeEventListener('scroll', updateActiveSection)
+      window.removeEventListener('resize', updateActiveSection)
     }
   }, [])
 
@@ -677,41 +949,41 @@ function App() {
     }
   }, [activeCertificate])
 
-  const portfolioItems =
-    portfolioFilter === 'project'
-      ? projects
-      : projects.filter((project) => project.category === portfolioFilter)
+  const portfolioItems = projects
 
   const handleContactChange = (event) => {
     const { name, value } = event.target
     setContactForm((current) => ({ ...current, [name]: value }))
+    if (contactFormNotice) {
+      setContactFormNotice('')
+    }
   }
 
-  const handleCommentChange = (event) => {
-    const { name, value } = event.target
-    setCommentForm((current) => ({ ...current, [name]: value }))
-  }
-
-  const handleCommentSubmit = (event) => {
+  const handleContactSubmit = (event) => {
     event.preventDefault()
 
-    if (!commentForm.name.trim() || !commentForm.message.trim()) {
+    const name = contactForm.name.trim()
+    const email = contactForm.email.trim()
+    const message = contactForm.message.trim()
+
+    if (!name || !email || !message) {
+      setContactFormNotice('Please fill in your name, email, and message first.')
       return
     }
 
-    setComments((current) => [
-      {
-        id: window.crypto?.randomUUID?.() ?? `${Date.now()}`,
-        name: commentForm.name.trim(),
-        message: commentForm.message.trim(),
-      },
-      ...current,
-    ])
+    const subject = encodeURIComponent(`Portfolio Contact from ${name}`)
+    const body = encodeURIComponent(
+      [
+        `Name: ${name}`,
+        `Email: ${email}`,
+        '',
+        'Message:',
+        message,
+      ].join('\n'),
+    )
 
-    setCommentForm({
-      name: '',
-      message: '',
-    })
+    window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`
+    setContactFormNotice('Opening your email app to send the message.')
   }
 
   const openCertificateModal = (event, certificate) => {
@@ -785,19 +1057,37 @@ function App() {
         </div>
       ) : null}
 
-      <main className={`portfolio-page ${isOverlayVisible ? 'is-hidden' : 'is-visible'}`}>
-        <header className="topbar reveal reveal-down is-revealed" data-reveal>
-          <a className="brand" href="#home">
-            Alsa
-          </a>
+      <nav
+        className={`bottom-nav ${isOverlayVisible ? 'is-hidden' : 'is-visible'}`}
+        aria-label="Section navigation"
+      >
+        <a className={`nav-icon-link ${activeSection === 'home' ? 'is-active' : ''}`} href="#home" aria-label="Home" title="Home">
+          <IconHome />
+          <span className="nav-label">Home</span>
+        </a>
+        <a className={`nav-icon-link ${activeSection === 'about' ? 'is-active' : ''}`} href="#about" aria-label="About" title="About">
+          <IconUser />
+          <span className="nav-label">About</span>
+        </a>
+        <a className={`nav-icon-link ${activeSection === 'portfolio' ? 'is-active' : ''}`} href="#portfolio" aria-label="Portfolio" title="Portfolio">
+          <IconCode />
+          <span className="nav-label">Work</span>
+        </a>
+        <a className={`nav-icon-link ${activeSection === 'achievements' ? 'is-active' : ''}`} href="#achievements" aria-label="Achievements" title="Achievements">
+          <IconTrophy />
+          <span className="nav-label">Awards</span>
+        </a>
+        <a className={`nav-icon-link ${activeSection === 'experience' ? 'is-active' : ''}`} href="#experience" aria-label="Experience" title="Experience">
+          <IconBriefcase />
+          <span className="nav-label">Journey</span>
+        </a>
+        <a className={`nav-icon-link ${activeSection === 'contact' ? 'is-active' : ''}`} href="#contact" aria-label="Contact" title="Contact">
+          <IconMail />
+          <span className="nav-label">Contact</span>
+        </a>
+      </nav>
 
-          <nav className="nav">
-            <a className={activeSection === 'home' ? 'is-active' : ''} href="#home">Home</a>
-            <a className={activeSection === 'about' ? 'is-active' : ''} href="#about">About</a>
-            <a className={activeSection === 'portfolio' ? 'is-active' : ''} href="#portfolio">Portfolio</a>
-            <a className={activeSection === 'contact' ? 'is-active' : ''} href="#contact">Contact</a>
-          </nav>
-        </header>
+      <main className={`portfolio-page ${isOverlayVisible ? 'is-hidden' : 'is-visible'}`}>
 
         <section className="hero-section section-frame reveal reveal-up" id="home" data-reveal>
           <div className="hero-copy reveal reveal-left" data-reveal>
@@ -833,14 +1123,11 @@ function App() {
             </div>
 
             <div className="social-row">
-              <a href="https://github.com/" aria-label="GitHub">
-                GH
+              <a href="https://github.com/alsanudinnnn-cmd/" aria-label="GitHub">
+                <IconGitHub />
               </a>
-              <a href="https://www.linkedin.com/" aria-label="LinkedIn">
-                IN
-              </a>
-              <a href="https://instagram.com/" aria-label="Instagram">
-                IG
+              <a href="https://www.instagram.com/ih8alsasm?igsh=MXc1eDF4NXdlYWh2bw==/" aria-label="Instagram">
+                <IconInstagram />
               </a>
             </div>
           </div>
@@ -859,11 +1146,12 @@ function App() {
               <span> Alsa</span>
             </h2>
             <p>
-              A highly motivated informatics student specializing in robust and
-              user-centric digital experiences. My background in networking and
-              communication engineering, combined with a strong passion for front-end
-              development, drives me to build interfaces that feel modern, clear,
-              and high-performing.
+              I am a detail-oriented IT professional with 2.5 years of experience in
+              software development and technical projects. Proficient in languages
+              like C++, Java, and Python, I possess extensive experience in PHPbased development and database management. My leadership roles in
+              multiple clubs demonstrate my strong teamwork and organizational
+              skills, which complement my technical abilities
+
             </p>
 
             <blockquote>
@@ -871,7 +1159,7 @@ function App() {
             </blockquote>
 
             <div className="about-actions">
-              <a className="about-primary-button" href="/alsa-cv.pdf" download>
+              <a className="about-primary-button" href="pdf/resumealsa.pdf" download>
                 <IconDownload />
                 Download CV
               </a>
@@ -902,34 +1190,36 @@ function App() {
           </div>
         </section>
 
-        <section className="about-stats section-frame reveal reveal-up" data-reveal>
-          <div className="about-stats-grid">
-            {aboutStats.map((stat) => {
-              const icon =
-                stat.label === 'Total Projects' ? (
-                  <IconCode />
-                ) : stat.label === 'Certificates' ? (
-                  <IconBadge />
-                ) : (
-                  <IconGlobe />
-                )
+        <section className="about-stats-outer section-frame reveal reveal-up" data-reveal>
+          <div className="about-stats">
+            <div className="about-stats-grid">
+              {aboutStats.map((stat) => {
+                const icon =
+                  stat.label === 'Total Projects' ? (
+                    <IconCode />
+                  ) : stat.label === 'Certificates' ? (
+                    <IconBadge />
+                  ) : (
+                    <IconGlobe />
+                  )
 
-              return (
-                <article
-                  key={stat.label}
-                  className="about-stat-card reveal reveal-up"
-                  data-reveal
-                >
-                  <div className="about-stat-icon">{icon}</div>
-                  <div className="about-stat-copy">
-                    <p>{stat.label}</p>
-                    <CountUpNumber value={stat.value} />
-                    <span>{stat.description}</span>
-                  </div>
-                  <small>live</small>
-                </article>
-              )
-            })}
+                return (
+                  <article
+                    key={stat.label}
+                    className="about-stat-card reveal reveal-up"
+                    data-reveal
+                  >
+                    <div className="about-stat-icon">{icon}</div>
+                    <div className="about-stat-copy">
+                      <p>{stat.label}</p>
+                      <CountUpNumber value={stat.value} />
+                      <span>{stat.description}</span>
+                    </div>
+                    <small>live</small>
+                  </article>
+                )
+              })}
+            </div>
           </div>
         </section>
 
@@ -964,23 +1254,6 @@ function App() {
 
           {portfolioSection === 'projects' ? (
             <>
-              <div className="portfolio-sub-tabs reveal reveal-up" data-reveal>
-                {[
-                  ['project', 'Project'],
-                  ['design', 'Design'],
-                  ['editing', 'Editing'],
-                ].map(([value, label]) => (
-                  <button
-                    key={value}
-                    type="button"
-                    className={portfolioFilter === value ? 'is-active' : ''}
-                    onClick={() => setPortfolioFilter(value)}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-
               <div className="showcase-grid">
                 {portfolioItems.map((project) => (
                   <article
@@ -1001,8 +1274,15 @@ function App() {
                       <h4>{project.title}</h4>
                       <p>{project.description}</p>
                       <div className="showcase-actions">
-                        <a href={project.appUrl} target="_blank" rel="noreferrer">
-                          View App
+                        <a
+                          href={project.appUrl}
+                          target={project.pending ? undefined : '_blank'}
+                          rel={project.pending ? undefined : 'noreferrer'}
+                          onClick={project.pending ? (event) => event.preventDefault() : undefined}
+                          className={project.pending ? 'is-disabled' : undefined}
+                          aria-disabled={project.pending ? 'true' : undefined}
+                        >
+                          {project.pending ? 'Pending' : 'View App'}
                           <IconExternal />
                         </a>
                         <a className="showcase-secondary-action" href="#contact">
@@ -1024,7 +1304,12 @@ function App() {
                     className="showcase-card reveal reveal-up certificate-card"
                     data-reveal
                   >
-                    <div className="showcase-preview certificate-preview">
+                    <div
+                      className={`showcase-preview certificate-preview ${certificate.image ? 'has-image' : ''}`}
+                    >
+                      {certificate.image ? (
+                        <img src={certificate.image} alt={`${certificate.title} background`} />
+                      ) : null}
                       <div className="showcase-overlay">
                         <span className="showcase-domain">{certificate.category}</span>
                         <h3>{certificate.visualTitle}</h3>
@@ -1081,27 +1366,116 @@ function App() {
           )}
         </section>
 
+        <section
+          className="portfolio-section achievements-section section-frame reveal reveal-up"
+          id="achievements"
+          data-reveal
+        >
+          <div className="achievements-header reveal reveal-down" data-reveal>
+            <p className="eyebrow">Recognition</p>
+            <h2>KEY ACHIEVEMENTS</h2>
+            <p className="portfolio-intro">
+              Milestones from competitions, awards, and leadership roles that
+              shaped my personal and professional growth.
+            </p>
+          </div>
+
+          <div className="achievement-gallery reveal reveal-up" data-reveal>
+            {achievementGallery.map((item) => (
+              <article key={item.title} className="achievement-gallery-card">
+                <div className="achievement-gallery-media">
+                  <img src={item.image} alt={item.title} />
+                </div>
+                <div className="achievement-gallery-copy">
+                  <strong>{item.title}</strong>
+                  <p>{item.caption}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+
+          <div className="achievement-list reveal reveal-up" data-reveal>
+            {keyAchievements.map((item) => (
+              <article key={item.title} className="achievement-item">
+                <div className="achievement-item-top">
+                  <span>{item.tag}</span>
+                </div>
+                <h3>{item.title}</h3>
+                <p>{item.detail}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="portfolio-section experience-section section-frame reveal reveal-up" id="experience" data-reveal>
+          <div className="experience-header reveal reveal-down" data-reveal>
+            <p className="eyebrow">Experience</p>
+            <h2>Industry Journey</h2>
+            <p className="portfolio-intro">
+              A timeline of roles that shaped my technical foundation, teamwork,
+              and real-world problem-solving approach.
+            </p>
+          </div>
+
+          <div className="roadmap-grid">
+            {experienceItems.map((item, index) => {
+              const sideClass = index % 2 === 0 ? 'is-left' : 'is-right'
+
+              return (
+                <article
+                  key={`${item.company}-${item.period}`}
+                  className={`roadmap-item ${sideClass} reveal reveal-up`}
+                  data-reveal
+                >
+                  <div className="roadmap-point" aria-hidden="true">
+                    <span>{index + 1}</span>
+                  </div>
+                  <span className="roadmap-connector" aria-hidden="true" />
+
+                  <div className="roadmap-card">
+                    <div className="roadmap-card-top">
+                      <span className="roadmap-step">Step {index + 1}</span>
+                      <span className="experience-role-tag">{item.category}</span>
+                    </div>
+
+                    <h3>{item.role}</h3>
+                    <p className="experience-company">{item.company}</p>
+                    <p className="experience-period">{item.period}</p>
+                    <p className="experience-location">{item.location}</p>
+
+                    <ul className="experience-points">
+                      {item.highlights.map((point) => (
+                        <li key={point}>{point}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        </section>
+
         <section className="contact-section section-frame reveal reveal-up" id="contact" data-reveal>
           <div className="contact-shell">
             <div className="contact-panel contact-panel-left reveal reveal-left" data-reveal>
               <div className="contact-panel-header">
                 <p className="eyebrow">Contact</p>
-                <h2>Hubungi</h2>
+                <h2>Contact Me!</h2>
                 <p className="contact-intro">
-                  Ada yang ingin didiskusikan? Kirim saya pesan dan mari kita
-                  bicara.
+                  Anything you'd like to discuss? Send me a message and let's talk.
                 </p>
               </div>
 
-              <form className="contact-form" onSubmit={(event) => event.preventDefault()}>
+              <form className="contact-form" onSubmit={handleContactSubmit}>
                 <label className="field">
                   <span>Name</span>
                   <input
                     name="name"
                     type="text"
-                    placeholder="Nama Anda"
+                    placeholder="Your Name"
                     value={contactForm.name}
                     onChange={handleContactChange}
+                    required
                   />
                 </label>
 
@@ -1110,9 +1484,10 @@ function App() {
                   <input
                     name="email"
                     type="email"
-                    placeholder="Email Anda"
+                    placeholder="Your Email"
                     value={contactForm.email}
                     onChange={handleContactChange}
+                    required
                   />
                 </label>
 
@@ -1120,71 +1495,34 @@ function App() {
                   <span>Message</span>
                   <textarea
                     name="message"
-                    placeholder="Pesan Anda"
+                    placeholder="Your Message"
                     value={contactForm.message}
                     onChange={handleContactChange}
                     rows="6"
+                    required
                   />
                 </label>
+
+                <button className="contact-submit" type="submit">
+                  <IconMail />
+                  Send Message
+                </button>
+
+                {contactFormNotice ? (
+                  <p className="contact-form-note" aria-live="polite">
+                    {contactFormNotice}
+                  </p>
+                ) : null}
               </form>
 
               <div className="contact-footer-note">Alsa - 2026</div>
             </div>
-
-            <div className="contact-panel contact-panel-right reveal reveal-right" data-reveal>
-              <div className="comment-header">
-                <h3>Comments ({comments.length})</h3>
-              </div>
-
-              <form className="comment-form" onSubmit={handleCommentSubmit}>
-                <label className="field">
-                  <span>Name *</span>
-                  <input
-                    name="name"
-                    type="text"
-                    placeholder="Enter your name"
-                    value={commentForm.name}
-                    onChange={handleCommentChange}
-                  />
-                </label>
-
-                <label className="field">
-                  <span>Message *</span>
-                  <textarea
-                    name="message"
-                    placeholder="Write your message here..."
-                    value={commentForm.message}
-                    onChange={handleCommentChange}
-                    rows="5"
-                  />
-                </label>
-
-                <button className="comment-submit" type="submit">
-                  Post Comment
-                </button>
-              </form>
-
-              <div className="comment-list">
-                {comments.length > 0 ? (
-                  comments.map((comment) => (
-                    <article
-                      key={comment.id}
-                      className="comment-card reveal reveal-up"
-                      data-reveal
-                    >
-                      <strong>{comment.name}</strong>
-                      <p>{comment.message}</p>
-                    </article>
-                  ))
-                ) : (
-                  <div className="comment-empty">
-                    Be the first person to leave a comment here.
-                  </div>
-                )}
-              </div>
-            </div>
           </div>
         </section>
+
+        <footer className="site-footer reveal reveal-up" data-reveal>
+          <p>Copyright © 2026 Alsa. All rights reserved.</p>
+        </footer>
 
         <a className="scroll-indicator" href="#about" aria-label="Scroll down">
           <IconArrow />
