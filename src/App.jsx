@@ -38,7 +38,7 @@ const projects = [
     preview: 'Student portal and dashboard UI system',
     visualTitle: 'Ebik.',
     image: projectImageMap.ebik,
-    appUrl: 'https://alsanudinnnn-cmd.github.io/Ebik./',
+    appUrl: 'https://ebik.vercel.app/',
   },
   {
     title: 'SmartWarm. IoT-based Warm-up Game System',
